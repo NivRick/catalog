@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>保健食品精選型錄</title>
+<style>
+  /* ── 基礎 Reset ─────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", "Heiti TC", Arial, sans-serif;
+    background: #e8e8e8;
+    color: #333;
+  }
+
+  /* ── 每頁 = A4 ──────────────────────────── */
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 10mm auto;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0,0,0,.18);
+    overflow: hidden;
+    page-break-after: always;
+    break-after: page;
+  }
+
+  /* ── 封面 ───────────────────────────────── */
+  .cover {
+    background: linear-gradient(160deg, #1a4a34 0%, #2d7a52 50%, #52b788 100%);
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 40mm 20mm;
+    gap: 0;
+  }
+  .cover-logo {
+    font-size: 52px;
+    margin-bottom: 12mm;
+  }
+  .cover-title {
+    font-size: 32pt;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 4px;
+    line-height: 1.4;
+    margin-bottom: 8mm;
+  }
+  .cover-sub {
+    font-size: 13pt;
+    color: #b7e4c7;
+    letter-spacing: 2px;
+    line-height: 1.8;
+  }
+  .cover-line {
+    width: 40mm;
+    height: 2px;
+    background: #52b788;
+    margin: 8mm auto;
+    border-radius: 2px;
+  }
+  .cover-year {
+    font-size: 10pt;
+    color: #95d5b2;
+    margin-top: 12mm;
+    letter-spacing: 3px;
+  }
+
+  /* ── 頁首 ───────────────────────────────── */
+  .page-header {
+    background: #1e5e3e;
+    padding: 4mm 8mm 4mm 10mm;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .header-brand {
+    font-size: 10pt;
+    color: #95d5b2;
+    letter-spacing: 1px;
+  }
+  .header-title {
+    font-size: 10pt;
+    color: rgba(255,255,255,.6);
+    letter-spacing: 1px;
+  }
+
+  /* ── 產品主體 ────────────────────────────── */
+  .product-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 7mm 12mm 5mm;
+  }
+
+  /* 品牌標籤 */
+  .brand-tag {
+    display: inline-block;
+    background: #d8f3dc;
+    color: #1e5e3e;
+    font-size: 10pt;
+    font-weight: 600;
+    letter-spacing: 1px;
+    padding: 1.5mm 4mm;
+    border-radius: 20px;
+    margin-bottom: 3mm;
+    align-self: flex-start;
+  }
+
+  /* 產品名稱 */
+  .product-name {
+    font-size: 22pt;
+    font-weight: 700;
+    color: #1e5e3e;
+    line-height: 1.3;
+    margin-bottom: 2mm;
+    letter-spacing: 1px;
+  }
+
+  /* 分隔線 */
+  .divider {
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(to right, #52b788, #d8f3dc);
+    border: none;
+    margin: 3mm 0;
+    border-radius: 1px;
+  }
+
+  /* 圖片區 */
+  .image-wrap {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f9fbf9;
+    border: 1px solid #e8f5e9;
+    border-radius: 6px;
+    padding: 4mm;
+    margin-bottom: 4mm;
+    min-height: 60mm;
+    max-height: 72mm;
+    overflow: hidden;
+  }
+  .image-wrap img {
+    max-width: 100%;
+    max-height: 66mm;
+    object-fit: contain;
+  }
+  .no-image {
+    color: #b0bfb8;
+    font-size: 9pt;
+    text-align: center;
+    padding: 10mm;
+  }
+
+  /* 資訊表格 */
+  .info-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11pt;
+    line-height: 1.7;
+    flex: 1;
+  }
+  .info-table tr:nth-child(odd) td {
+    background: #f4fbf5;
+  }
+  .info-table tr:nth-child(even) td {
+    background: #fff;
+  }
+  .info-table td {
+    padding: 2.5mm 3mm;
+    vertical-align: top;
+    border-bottom: 1px solid #e3f0e6;
+  }
+  .info-table td.label {
+    width: 22%;
+    font-weight: 700;
+    color: #1e5e3e;
+    white-space: nowrap;
+    font-size: 11pt;
+  }
+  .info-table td.val {
+    color: #333;
+    word-break: break-word;
+  }
+
+  /* 注意事項行 */
+  .info-table tr.notice td {
+    background: #fff8e1 !important;
+    color: #7a5500;
+    font-size: 10.5pt;
+  }
+  .info-table tr.notice td.label {
+    color: #a07000;
+  }
+
+  /* ── 頁尾 ───────────────────────────────── */
+  .page-footer {
+    border-top: 1px solid #c8e6c9;
+    padding: 2.5mm 12mm;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .footer-note {
+    font-size: 9pt;
+    color: #a0bfa8;
+  }
+  .page-num {
+    font-size: 9.5pt;
+    color: #52b788;
+    font-weight: 600;
+  }
+
+  /* ── 列印模式 ────────────────────────────── */
+  @media print {
+    body { background: none; }
+    .page {
+      margin: 0;
+      box-shadow: none;
+      width: 210mm;
+      min-height: 297mm;
+      height: 297mm;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════ 封面 ════════════ -->
+<div class="page cover">
+  <div class="cover-logo">🌿</div>
+  <div class="cover-title">保健食品<br>精選型錄</div>
+  <div class="cover-line"></div>
+  <div class="cover-sub">
+    嚴選高品質保健食品<br>
+    守護您與家人的健康
+  </div>
+  <div class="cover-year">2026 PRODUCT CATALOG</div>
+</div>
+
+<!-- ════════════ P1：褐抑定 Plus⁺ ════════════ -->
+<div class="page">
+  <div class="page-header">
+    <span class="header-brand">Hi-Q 中華海洋生技</span>
+    <span class="header-title">保健食品精選型錄</span>
+  </div>
+  <div class="product-body">
+    <div class="brand-tag">Hi-Q 中華海洋生技</div>
+    <div class="product-name">褐抑定 Plus<sup>+</sup></div>
+    <hr class="divider">
+    <div class="image-wrap">
+      <img src="褐抑定.avif" alt="褐抑定 Plus+">
+    </div>
+    <table class="info-table">
+      <tr>
+        <td class="label">產品介紹</td>
+        <td class="val">Hi-Q 褐抑定 Plus⁺ 強效配方，採用純淨海域天然褐藻，以先進低分子化技術萃取製成 OliFuco® Plus 高純度小分子褐藻醣膠，易於人體吸收。適合病後補養、促進精神旺盛。台灣原產，全素可食。</td>
+      </tr>
+      <tr>
+        <td class="label">主要成分</td>
+        <td class="val">OliFuco® Plus 褐藻萃取物 2,200mg（含小分子褐藻醣膠）、玉米來源可溶性纖維、馬鈴薯澱粉、二氧化矽。每包 2.4 公克，每盒 30 包。含麩質之穀物及其製品，不適合對其過敏體質者食用。</td>
+      </tr>
+      <tr>
+        <td class="label">建議用法</td>
+        <td class="val">建議空腹食用。一般保養每日 1 包，加強保養每日 2 包以上，使用前請諮詢醫師或藥師。可一次食用或分次食用。</td>
+      </tr>
+      <tr>
+        <td class="label">保存方式</td>
+        <td class="val">請放置陰涼乾燥處，避免陽光直射，常溫三年（未開封）</td>
+      </tr>
+    </table>
+  </div>
+  <div class="page-footer">
+    <span class="footer-note">本型錄資訊僅供參考，實際產品以購買時標示為準</span>
+    <span class="page-num">01</span>
+  </div>
+</div>
+
+<!-- ════════════ P2：藻衡糖 Plus II ════════════ -->
+<div class="page">
+  <div class="page-header">
+    <span class="header-brand">Hi-Q health</span>
+    <span class="header-title">保健食品精選型錄</span>
+  </div>
+  <div class="product-body">
+    <div class="brand-tag">Hi-Q health</div>
+    <div class="product-name">藻衡糖 Plus II</div>
+    <hr class="divider">
+    <div class="image-wrap">
+      <img src="藻衡醣.png" alt="藻衡糖 Plus II">
+    </div>
+    <table class="info-table">
+      <tr>
+        <td class="label">產品介紹</td>
+        <td class="val">結合專利 FucoBalan® 褐藻萃取、99% 苦瓜胜肽、茯鹼酸鉻、白腎豆萃取四大核心成分，有助於維持醣類正常代謝，促進代謝、調整體質、調理體態。全素可食，錠狀食品。</td>
+      </tr>
+      <tr>
+        <td class="label">主要成分</td>
+        <td class="val">FucoBalan® 褐藻萃取物（褐藻萃取物、玉米來源可溶性纖維）、微結晶狀α-纖維素（微結晶狀α-纖維素、麥芽糊精）、二氧化矽、硬脂酸鎂、白腎豆萃取物（白腎豆萃取物、阿拉伯膠）、苦瓜籽萃取物（含胜肽）、茯鹼酸鉻複合物（茯鹼酸鉻、氯化鈉）。每份 3 錠，每盒 30 份。</td>
+      </tr>
+      <tr>
+        <td class="label">建議用法</td>
+        <td class="val">每日 1–2 次，建議餐前或餐間每次食用 3 錠，搭配溫開水食用，一日請勿超過 6 錠（2 包）。</td>
+      </tr>
+      <tr>
+        <td class="label">營養資訊<br><small>（每份 3 錠）</small></td>
+        <td class="val">熱量 10.7 大卡、茯鹼素 0.5mg NE、鉻 90 微克</td>
+      </tr>
+      <tr>
+        <td class="label">保存方式</td>
+        <td class="val">置於陰涼乾燥處，避免高溫、陽光直射，常溫兩年（未開封）</td>
+      </tr>
+    </table>
+  </div>
+  <div class="page-footer">
+    <span class="footer-note">本型錄資訊僅供參考，實際產品以購買時標示為準</span>
+    <span class="page-num">02</span>
+  </div>
+</div>
+
+<!-- ════════════ P3：Eye Care 護眼膠囊 ════════════ -->
+<div class="page">
+  <div class="page-header">
+    <span class="header-brand">Allbe</span>
+    <span class="header-title">保健食品精選型錄</span>
+  </div>
+  <div class="product-body">
+    <div class="brand-tag">Allbe</div>
+    <div class="product-name">Eye Care 護眼膠囊</div>
+    <hr class="divider">
+    <div class="image-wrap">
+      <img src="61ghQs7H-kL._AC_SL1500_.jpg" alt="Eye Care 護眼膠囊">
+    </div>
+    <table class="info-table">
+      <tr>
+        <td class="label">產品介紹</td>
+        <td class="val">專為眼睛健康設計，有助改善黃斑色素光學密度，支持眼睛在陽光損傷相關條件下的健康，並降低白內障發展風險。加拿大 GMP 廠製造，通過 FDA、CHFA 認證。</td>
+      </tr>
+      <tr>
+        <td class="label">主要成分</td>
+        <td class="val">葉黃素（3R,3'R,6'R）-beta,epsilon-Carotene-3,3'-diol 20mg（萬壽菊花萃取）、馬基莓 Aristotelia Chilensis 60mg（20:1，等同 1,200mg）。其他成分：Hypromellose、微晶纖維素、硬脂酸鎂。不含人工防腐劑、人工甜味劑、人工色素、麩質、乳製品、酵母。</td>
+      </tr>
+      <tr>
+        <td class="label">建議用法</td>
+        <td class="val">成人每日 1 次，每次 1 粒，隨含油脂的餐食服用（脂溶性成分，搭配油脂吸收更佳）。懷孕或哺乳期請先諮詢醫師。</td>
+      </tr>
+      <tr>
+        <td class="label">保存方式</td>
+        <td class="val">25°C 以下陰涼乾燥處，避光保存</td>
+      </tr>
+    </table>
+  </div>
+  <div class="page-footer">
+    <span class="footer-note">本型錄資訊僅供參考，實際產品以購買時標示為準</span>
+    <span class="page-num">03</span>
+  </div>
+</div>
+
+<!-- ════════════ P4：NMN36000 Diamond ════════════ -->
+<div class="page">
+  <div class="page-header">
+    <span class="header-brand">Allbe</span>
+    <span class="header-title">保健食品精選型錄</span>
+  </div>
+  <div class="product-body">
+    <div class="brand-tag">Allbe</div>
+    <div class="product-name">NMN36000 Diamond</div>
+    <hr class="divider">
+    <div class="image-wrap">
+      <img src="818IsSP0DQL._AC_SL1500_.jpg" alt="NMN36000 Diamond">
+    </div>
+    <table class="info-table">
+      <tr>
+        <td class="label">產品介紹</td>
+        <td class="val">NAD+ 前驅物，每粒含 600mg 高濃度 NMN（Nicotinamide Mononucleotide），促進細胞代謝與肌耐力，高效抗氧化保護細胞。加拿大 Mapleland Biotech Corporation GMP 廠製造，純素友善。</td>
+      </tr>
+      <tr>
+        <td class="label">主要成分</td>
+        <td class="val">NMN（Nicotinamide Mononucleotide）600mg。其他成分：Hypromellose、硬脂酸鎂、微晶纖維素。不含人工防腐劑、人工甜味劑、人工色素、麩質、乳製品、酵母。60 粒裝。</td>
+      </tr>
+      <tr>
+        <td class="label">建議用法</td>
+        <td class="val">成人 18 歲以上，每日 1 粒。建議早晨空腹或隨早餐服用。超過四週使用請諮詢醫療人員。懷孕或哺乳期請先諮詢醫師。</td>
+      </tr>
+      <tr>
+        <td class="label">保存方式</td>
+        <td class="val">25°C 以下密封避光乾燥處保存</td>
+      </tr>
+    </table>
+  </div>
+  <div class="page-footer">
+    <span class="footer-note">本型錄資訊僅供參考，實際產品以購買時標示為準</span>
+    <span class="page-num">04</span>
+  </div>
+</div>
+
+<!-- ════════════ P5：Plant-D3 ════════════ -->
+<div class="page">
+  <div class="page-header">
+    <span class="header-brand">Triquetra</span>
+    <span class="header-title">保健食品精選型錄</span>
+  </div>
+  <div class="product-body">
+    <div class="brand-tag">Triquetra</div>
+    <div class="product-name">Plant-D3 維生素 D3 滴劑</div>
+    <hr class="divider">
+    <div class="image-wrap">
+      <img src="PlantD3.webp" alt="Plant-D3 維生素D3滴劑">
+    </div>
+    <table class="info-table">
+      <tr>
+        <td class="label">產品介紹</td>
+        <td class="val">Plant-D3® 源自日照海藻萃取的有機植物性維生素 D3（膽鈣化醇），舌下液態滴劑設計可繞過消化直接進入血液，吸收率更高更快。劑量靈活可調，一瓶最多可使用 600 次（每滴 500 IU）。美國製造，Oregon Tilth 有機認證。</td>
+      </tr>
+      <tr>
+        <td class="label">主要成分</td>
+        <td class="val">有機維生素 D3（來自海藻）10,000 IU、有機 MCT Oil 900mg（來自初榨椰子油）、D-Alpha Tocopherol（來自葵花籽）、Cholecalciferol（來自海藻）。無大豆、無麩質、無 GMO、無乳製品。</td>
+      </tr>
+      <tr>
+        <td class="label">建議用法</td>
+        <td class="val">使用前搖勻。每次 20 滴（1ml），加入水、果汁或冰沙，或直接舌下含服。<br>劑量對照：1 滴 = 500 IU、5 滴 = 2,500 IU、10 滴 = 5,000 IU、20 滴 = 10,000 IU。<br>有服藥或特殊疾病者請先諮詢醫師。</td>
+      </tr>
+      <tr>
+        <td class="label">保存方式</td>
+        <td class="val">陰涼乾燥處保存</td>
+      </tr>
+    </table>
+  </div>
+  <div class="page-footer">
+    <span class="footer-note">本型錄資訊僅供參考，實際產品以購買時標示為準</span>
+    <span class="page-num">05</span>
+  </div>
+</div>
+
+<!-- ════════════ P6：友益康益生菌 ════════════ -->
+<div class="page">
+  <div class="page-header">
+    <span class="header-brand">景岳生技 GenMont</span>
+    <span class="header-title">保健食品精選型錄</span>
+  </div>
+  <div class="product-body">
+    <div class="brand-tag">景岳生技 GenMont</div>
+    <div class="product-name">友益康益生菌</div>
+    <hr class="divider">
+    <div class="image-wrap">
+      <img src="友益康.png" alt="友益康益生菌">
+    </div>
+    <table class="info-table">
+      <tr>
+        <td class="label">產品介紹</td>
+        <td class="val">景岳專利三株益生菌配方，結合羅伊氏乳桿菌 L. reuteri GMNL®-89、植物乳桿菌 L. plantarum、副乾酪乳桿菌 L. paracasei GMNL®-133，幫助消化道保健，維持腸道菌叢平衡，全方位腸胃照護。臺灣原產，保存期限二年。</td>
+      </tr>
+      <tr>
+        <td class="label">主要成分</td>
+        <td class="val">三株景岳專利益生菌、果寡糖、玉米來源可溶性纖維、麥醯胺酸、麥芽糊精。每包 3 公克，每盒 60 包。含牛奶、大豆及其製品。</td>
+      </tr>
+      <tr>
+        <td class="label">建議用法</td>
+        <td class="val">保養期每日 1–4 包；調整期每日 4–6 包。可直接倒入口中搭配飲水食用。</td>
+      </tr>
+      <tr>
+        <td class="label">營養資訊<br><small>（每包 3g）</small></td>
+        <td class="val">熱量 10.7 大卡、蛋白質 1.1g、脂肪 0.03g、碳水化合物 1.7g、膳食纖維 0.4g、鈉 17.6mg</td>
+      </tr>
+      <tr>
+        <td class="label">保存方式</td>
+        <td class="val">25°C 以下陰涼乾燥避光處；鋁箔袋開封後請盡早食用完畢</td>
+      </tr>
+    </table>
+  </div>
+  <div class="page-footer">
+    <span class="footer-note">本型錄資訊僅供參考，實際產品以購買時標示為準</span>
+    <span class="page-num">06</span>
+  </div>
+</div>
+
+<!-- ════════════ P7：青春奇肌煥活面膜 ════════════ -->
+<div class="page">
+  <div class="page-header">
+    <span class="header-brand">Exocare / Stemimic®</span>
+    <span class="header-title">保健食品精選型錄</span>
+  </div>
+  <div class="product-body">
+    <div class="brand-tag">Exocare / Stemimic®</div>
+    <div class="product-name">青春奇肌煥活面膜</div>
+    <hr class="divider">
+    <div class="image-wrap">
+      <img src="青春奇肌煥活面膜.jpg" alt="青春奇肌煥活面膜">
+    </div>
+    <table class="info-table">
+      <tr>
+        <td class="label">產品介紹</td>
+        <td class="val">蘊含獨家仿生技術研發的 Stemimic® 仿生因子，從肌膚根本喚醒自我更新與修護能力。搭配 Argireline Solution 緊緻、ANASENSYL 修護、Pentavitin® 鑽水磁石保濕、ActiStem Gold Nest 透亮四大複合活性成分，使肌膚增加彈性、提升緊緻度。棉絨材質布膜，台灣製造，5 片裝，每片 28ml。</td>
+      </tr>
+      <tr>
+        <td class="label">主要成分</td>
+        <td class="val">Water、Propanediol、Glycerin、Niacinamide、Palmitoyl Oligopeptide、Sodium Hyaluronate、Swiftlet Nest Extract、Acetyl Hexapeptide-8、Lactococcus Ferment Lysate、Hibiscus Sabdariffa Fruit Extract、Mannitol、Ammonium Glycyrrhizate、Caffeine、Zinc Gluconate、Aesculus Hippocastanum Seed Extract 等。</td>
+      </tr>
+      <tr>
+        <td class="label">建議用法</td>
+        <td class="val">洗臉後取出面膜（藍色層朝外），調整位置完整服貼肌膚，停留 10–15 分鐘後取下，輕輕按摩吸收後再塗抹後續保養品。每週 2–3 次為佳。</td>
+      </tr>
+      <tr class="notice">
+        <td class="label">注意事項</td>
+        <td class="val">一次性商品，開封後請立即使用；僅供外部使用，避免眼睛部位；如有不適或過敏請立即停用並諮詢專業醫師。</td>
+      </tr>
+      <tr>
+        <td class="label">保存方式</td>
+        <td class="val">置於陰涼處，避免陽光直射，保存期限 3 年</td>
+      </tr>
+    </table>
+  </div>
+  <div class="page-footer">
+    <span class="footer-note">本型錄資訊僅供參考，實際產品以購買時標示為準</span>
+    <span class="page-num">07</span>
+  </div>
+</div>
+
+<!-- ════════════ P8：脂妙清軟膠囊 ════════════ -->
+<div class="page">
+  <div class="page-header">
+    <span class="header-brand">OMACOR</span>
+    <span class="header-title">保健食品精選型錄</span>
+  </div>
+  <div class="product-body">
+    <div class="brand-tag">OMACOR</div>
+    <div class="product-name">脂妙清軟膠囊 1000mg</div>
+    <hr class="divider">
+    <div class="image-wrap">
+      <img src="脂妙清.jpg" alt="脂妙清軟膠囊">
+    </div>
+    <table class="info-table">
+      <tr>
+        <td class="label">產品介紹</td>
+        <td class="val">醫藥級處方 Omega-3 魚油，衛部藥製字第 059019 號，非一般保健型魚油。適用於高三酸甘油酯（血）症的治療與調節，需由醫師處方使用。</td>
+      </tr>
+      <tr>
+        <td class="label">主要成分</td>
+        <td class="val">Omega-3-acid ethyl esters 90，每粒 1,000mg，28 粒裝</td>
+      </tr>
+      <tr>
+        <td class="label">適應症</td>
+        <td class="val">高三酸甘油酯（血）症</td>
+      </tr>
+      <tr class="notice">
+        <td class="label">建議用法</td>
+        <td class="val">本藥需由醫師處方使用，用法用量詳見仿單，請遵醫囑服用</td>
+      </tr>
+      <tr>
+        <td class="label">保存方式</td>
+        <td class="val">30°C 以下陰涼乾燥處，避免陽光照射，必須放置於兒童無法取得之處</td>
+      </tr>
+    </table>
+  </div>
+  <div class="page-footer">
+    <span class="footer-note">本型錄資訊僅供參考，實際產品以購買時標示為準</span>
+    <span class="page-num">08</span>
+  </div>
+</div>
+
+</body>
+</html>
